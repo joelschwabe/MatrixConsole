@@ -1,0 +1,312 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<title>Wake up Neo...</title>
+		<style>
+			div {
+				margin: 0;
+				margin-top: 0;
+				margin-bottom: 0;
+				background-color: #000000;
+				border-spacing: 0;
+				border-collapse: collapse;
+				overflow: hidden;
+			}	
+
+			.getAtt, .char, td{
+					margin-top: 0;
+					margin-bottom: 0;
+					margin:0;
+					padding: 0;
+					font-family: 'Lucida Console', monospace;
+					color:green;
+					font-size: 200%;
+					font-weight: bold;
+					width: 32px;
+					height: 32px;
+					overflow: hidden;
+					display: inline-block;
+					white-space: nowrap;
+					border-spacing: 0;
+					border-collapse: collapse;
+			}		
+
+			table{
+				table-layout:fixed;
+			}
+			::-webkit-scrollbar {
+				display: none;
+			}
+		</style>
+	</head>
+	<body style="background-color:black">
+		<div class="outer"> 
+			<div class="inner">
+				<p class="getAtt">O</p>
+				<table class="matrix"><tr></tr></table>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		//The Matrix Console
+		// Author: Joel Schwabe
+		// Date: Sept 22nd 2015
+		$(document).ready(function () {
+			var windowHeight,
+				windowWidth,
+				charHeight,
+				charWidth,
+				lineMax,
+				charMax,
+				paused,
+				msTime,
+				lines,
+				timer,
+				delta,
+				r,
+				g,
+				b;
+			intialize();
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||						            	SETUP & INITIALIZATION						                		||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/		
+			function intialize() {
+				r = {color: 0};   //set colors as objects so they can be called by ref
+				g = {color: 127};
+				b = {color: 0};
+				lines = 0;
+				paused = false;
+				windowWidth = $(window).width();
+				windowHeight = $(window).height();
+				charWidth = $(".getAtt").width();
+				charHeight = $(".getAtt").height() - 6;
+				$("p").remove(".getAtt");
+				charMax = Math.floor(windowWidth / charWidth); 
+				lineMax = Math.floor(windowHeight / charHeight/1.3);
+				delta = Math.floor(255 / charMax);
+				/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+				||||				                	ONE ROW EVERY msTime MILLISECONDS				        			||||
+				\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/		
+				msTime = 120;
+				timer = setInterval(function() {printToScreen()}, msTime);
+			}
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||						                 		INPUT 	EVENTS				                					||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/		
+			function mouseEnter(ev) {
+				var target = $(ev.target),
+					id = target.attr('id');
+				console.log("in mouseEnter:"+id);
+				if (paused){
+					$("#" + id).css({"color" : "red"});
+				}
+				else{
+				$("#" + id).css({"color" : "yellow"});
+				}
+			};
+			function mouseLeave(ev) {
+				var target = $(ev.target),
+					id = target.attr('id');
+				console.log("in mouseLeave:"+id);
+				if (paused){
+					$("#" + id).css({"color" : "black"});
+				}
+				else{
+					$("#" + id).css({"color" : "white"});
+				}
+			};
+			function myStopFunction() {
+				if (paused == true){
+					timer = setInterval(function(){printToScreen()},msTime);;
+					paused = false;
+				}
+				else{
+					paused = true;
+					console.log("Paused matrix");
+					clearInterval(timer);
+				}
+				delta = delta + 15;
+			};	
+			$(".outer").mouseover(mouseEnter);
+			$(".outer").mouseout(mouseLeave);
+			$(".outer").click(myStopFunction);
+			$(window).resize(function () {
+				waitForFinalEvent(function(){
+						//I tried to put this in a function but it kept breaking everything  :( 
+						r = {color: 0};   
+						g = {color: 127};
+						b = {color: 0};
+						lines = 0;
+						$( ".inner" ).remove();
+						$( ".outer" ).append("<div class=\"inner\"><table class=\"matrix\"><tr class=\"char\"><td class=\"char\">X</td></tr></table></div>"); 
+						windowWidth = $(window).width();
+						windowHeight = $(window).height();
+						charWidth = $(".char").width();
+						charHeight = $(".char").height();
+						$( "tr" ).remove( ".char" );
+						lineMax = Math.floor(windowHeight / charHeight);
+						charMax = Math.floor(windowWidth / charHeight);	
+						delta = Math.floor(255 / charMax);
+				}, 		250, "aRandomUniqueString");
+				paused = false;
+			});	
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||					              	RETURN CHARACTER METHODS								              ||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/	
+			function getAscii(){
+				var ascii= String.fromCharCode(Math.floor(Math.random() * 256)); 
+				return ascii;
+			};
+			function getUnicode(){
+				unicode = '';
+				for (i = 0; i < 4; i +=1){
+					unicode = unicode + randomHexVal();
+				};
+				return String.fromCharCode(parseInt(unicode,16));
+			};	
+			function randomHexVal(){
+				var ranHex = Math.floor(Math.random() * 16);
+				switch(ranHex) {
+					case 10:
+						ranHex = 'A';
+						break;
+					case 11:
+						ranHex = 'B';
+						break;
+					case 12:
+						ranHex = 'C';
+						break;				
+					case 13:
+						ranHex = 'D';
+						break;	
+					case 14:
+						ranHex = 'E';
+						break;
+					case 15:
+						ranHex = 'F';
+						break;	
+					default:
+						break;
+				};
+				return ranHex;
+			};
+			function getColor(shade){
+				if(delta > 128){
+					delta = Math.floor(255 / charMax);
+				};
+				if(shade.color < (254-delta)){
+					shade.color += delta;
+				}else{
+					shade.color = 0;
+				};
+				return shade.color;
+			};
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||					            		CREATE UNIQUE CHARACTER							                	||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/			
+			function getText(){
+				var textChar = '',
+					uniOrAscii = Math.floor(Math.random() * 4);
+				switch(uniOrAscii) {
+					case 0:
+						textChar = getUnicode();
+						break;
+					case 1:
+						textChar = getUnicode();
+						break;
+					case 2:
+						textChar = getUnicode();
+						break;
+					default:
+						textChar = getAscii();
+						break;
+				};
+				return textChar;
+			}
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||						            	CREATE UNIQUE ROW STRING					                		||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/		
+			function getLine(){
+				var text = '',
+					textLine = '',
+					hairBr = ['B','r','u','n','e','t','t','e'],
+					hairBl = ['B','l','o','n','d','e'],
+					hairRh = ['R','e','d','h','e','a','d'],
+					insertPoint = -1,
+					insert,
+					insertCount = 0,
+					insertActive = false;
+				//Semi-randomly choose one of 3 strings to insert into row
+				if(lines % 7 == 0){
+					var insertChoice = Math.floor(Math.random() * 3);			
+					switch(insertChoice) {
+					case 0:
+						insert = hairBr;
+						break;
+					case 1:
+						insert = hairBl;
+						break;
+					default:
+						insert = hairRh;
+						break;
+					};
+					//choose a random point of insertion
+					insertPoint = Math.floor(Math.random() * charMax-12);
+				};
+				//if there is a string to insert, do that, otherwise, get a random character
+				for (var i = 0; i < charMax; i++){
+					if(i == insertPoint){
+						insertActive = true;	
+					}
+					if(insertActive==true && (insertCount < insert.length)){
+						text = insert[insertCount];
+						insertCount++;
+					}
+					else{
+						text = getText();
+					}
+					textLine += "<td class=\"char\" id=\"" + lines + "x" + i + "\"  style=\"color: rgb(0," + getColor(g) + ",0) \">" + text +"</td>";
+				};
+				insert = null;
+				return "<tr class=\"line\" id=\"" + lines + "\">" + textLine + "</tr>";
+			};	
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||							              PRINT ROW TO SCREEN					                				||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/	
+			function printToScreen(){
+				if(lines >= lineMax){
+					var listItem = document.getElementById(getLineRemove());
+					$(listItem).remove();
+				};
+				$( ".matrix" ).prepend(getLine());
+				lines++;
+			};	
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||						                	REMOVE BOTTOM ROW								                	||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/	
+			function getLineRemove(){
+				var removeLine = "";
+				removeLine += lines - lineMax;
+				console.log(removeLine);
+				return removeLine;
+			};	
+		/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////////////\\
+		||||					              		LAST SINGLETON EVENT HANDLER				            		||||
+		\\\\/////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/	
+			//Ensures that multiple events don't trigger if not unique (eg: resize on click release, not fluid)
+			var waitForFinalEvent = (function () {
+			  var timers = {};
+			  return function (callback, ms, uniqueId) {
+				if (!uniqueId) {
+				  uniqueId = "Don't call this twice without a uniqueId";
+				}
+				if (timers[uniqueId]) {
+				  clearTimeout (timers[uniqueId]);
+				}
+				timers[uniqueId] = setTimeout(callback, ms);	
+			  };
+			})();
+		});		
+	</script>
+</html>
